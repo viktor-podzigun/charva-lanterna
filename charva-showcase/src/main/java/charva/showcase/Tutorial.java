@@ -32,7 +32,7 @@ import charvax.swing.JPanel;
 public class Tutorial extends JFrame implements ActionListener {
     
     private ColorScheme     savedColors;
-    
+    private ActionListener exitActionListener;
 
     public Tutorial() {
         super("Charva Demo, (c) R Pitman, 2002-2006, (c) charva-lanterna, 2015");
@@ -185,6 +185,10 @@ public class Tutorial extends JFrame implements ActionListener {
         validate();
     }
 
+    public void setExitActionListener(final ActionListener exitActionListener) {
+        this.exitActionListener = exitActionListener;
+    }
+
     public void actionPerformed(ActionEvent ae) {
         String    actionCommand = ae.getActionCommand();
         Component source        = (Component)ae.getSource();
@@ -206,7 +210,11 @@ public class Tutorial extends JFrame implements ActionListener {
                 savedColors = null;
             }
             //System.gc();    // so that HPROF reports only live objects.
-            hide();
+            if (exitActionListener != null) {
+                exitActionListener.actionPerformed(ae);
+            } else {
+                hide();
+            }
 //        } else if (actionCommand.equals("JFileChooser")) {
 //            testFileChooser();
 //        } else if (actionCommand.equals("custom FileChooser")) {

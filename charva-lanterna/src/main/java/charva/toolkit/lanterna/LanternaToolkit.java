@@ -25,8 +25,6 @@ import charva.awt.TerminalWindow;
 import charva.awt.Toolkit;
 import charva.awt.Window;
 import charva.awt.event.KeyEvent;
-import charva.showcase.Tutorial;
-import charvax.swing.SwingUtilities;
 import com.googlecode.lanterna.TerminalFacade;
 import com.googlecode.lanterna.input.Key;
 import com.googlecode.lanterna.terminal.ACS;
@@ -39,18 +37,18 @@ import com.googlecode.lanterna.terminal.TerminalSize;
  */
 public class LanternaToolkit extends Toolkit {
 
-    private final Terminal  terminal;
-    private final Thread    eventThread;
-    
-    private boolean         isCursorVisible;
-    private int             cursorX;
-    private int             cursorY;
+    private final Terminal terminal;
+    private final EventWorker eventWorker;
+
+    private boolean isCursorVisible;
+    private int cursorX;
+    private int cursorY;
     
     
     public LanternaToolkit() {
         terminal = TerminalFacade.createTerminal();
-        eventThread = new Thread(new EventThread());
-        
+        eventWorker = new EventWorker();
+
         setDefaultToolkit(this);
     }
     
@@ -140,9 +138,9 @@ public class LanternaToolkit extends Toolkit {
     }
 
     protected void showWindow(LanternaWindow window) {
-        Window w = window.getCharvaWindow();
-        
-        Point location = w.getLocationOnScreen();
+        final Window w = window.getCharvaWindow();
+
+        final Point location = w.getLocationOnScreen();
         
         // call native implementation
 //        showWindow(pluginImpl, w.hasShadow(), 
@@ -153,16 +151,12 @@ public class LanternaToolkit extends Toolkit {
     }
 
     public Dimension getScreenSize() {
-        TerminalSize size = terminal.getTerminalSize();
+        final TerminalSize size = terminal.getTerminalSize();
         return new Dimension(size.getColumns(), size.getRows());
     }
     
     protected TerminalWindow createWindowPeer(Window charvaWindow) {
         return new LanternaWindow(this, charvaWindow);
-    }
-    
-    public void startEventThread() {
-        eventThread.start();
     }
     
     private char mapVirtualSign(char key) {
@@ -264,58 +258,56 @@ public class LanternaToolkit extends Toolkit {
         return KeyEvent.VK_UNDEFINED;
     }
 
-    private void createUI() {
-        new Tutorial().show();
+    public void startEventThread() {
+        if (!eventWorker.isRunning()) {
+            new Thread(eventWorker).start();
+        }
     }
 
-    public static void main(String[] args) {
-        final LanternaToolkit toolkit = new LanternaToolkit();
-        toolkit.startEventThread();
-        
-        SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-                toolkit.createUI();
-            }
-        });
+    public void stopEventThread() {
+        eventWorker.stopRequest();
     }
-    
-    
-    private final class EventThread implements Runnable {
-        
+
+    private final class EventWorker implements Runnable {
+
+        private volatile boolean running;
+        private volatile boolean stopRequest;
+
+        public boolean isRunning() {
+            return running;
+        }
+
+        public void stopRequest() {
+            stopRequest = true;
+        }
+
         public void run() {
-            try {
-                terminal.enterPrivateMode();
-            
-            } catch (Exception x) {
-                x.printStackTrace();
-                return;
-            }
-            
+            running = true;
+            terminal.enterPrivateMode();
+
             try {
                 terminal.clearScreen();
                 terminal.moveCursor(0, 0);
                 
-                EventQueue eventQueue = EventQueue.getInstance();
+                final EventQueue eventQueue = EventQueue.getInstance();
                 
-                while (true) {
-                    Key key = terminal.readInput();
+                while (!stopRequest) {
+                    final Key key = terminal.readInput();
                     if (key != null) {
-                        if (key.getCharacter() == 'q') {
-                            break;
-                        }
-                        
                         processKeyEvent(getTopWindow(), mapVirtualKey(key), 0);
                     }
                     
                     if (!eventQueue.isEmpty()) {
                         processIdleEvent();
-                    
+
                     } else {
-                        Thread.sleep(100);
+                        try {
+                            Thread.sleep(100);
+                        } catch (InterruptedException e) {
+                            stopRequest();
+                        }
                     }
                 }
-            } catch (Exception x) {
-                x.printStackTrace();
             } finally {
                 terminal.exitPrivateMode();
             }

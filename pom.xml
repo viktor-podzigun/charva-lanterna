@@ -18,6 +18,7 @@
     <module>charva</module>
     <module>charva-showcase</module>
     <module>charva-lanterna</module>
+    <module>charva-demo-app</module>
   </modules>
 
 </project>
