@@ -17,6 +17,7 @@
 
 package charva.toolkit.lanterna;
 
+import java.io.IOException;
 import charva.awt.Dimension;
 import charva.awt.EventQueue;
 import charva.awt.GraphicsConstants;
@@ -25,78 +26,109 @@ import charva.awt.TerminalWindow;
 import charva.awt.Toolkit;
 import charva.awt.Window;
 import charva.awt.event.KeyEvent;
-import com.googlecode.lanterna.TerminalFacade;
-import com.googlecode.lanterna.input.Key;
-import com.googlecode.lanterna.terminal.ACS;
+import com.googlecode.lanterna.SGR;
+import com.googlecode.lanterna.Symbols;
+import com.googlecode.lanterna.TerminalPosition;
+import com.googlecode.lanterna.TerminalSize;
+import com.googlecode.lanterna.TextCharacter;
+import com.googlecode.lanterna.TextColor;
+import com.googlecode.lanterna.input.KeyStroke;
+import com.googlecode.lanterna.screen.TerminalScreen;
 import com.googlecode.lanterna.terminal.Terminal;
-import com.googlecode.lanterna.terminal.TerminalSize;
-
 
 /**
  * Lanterna {@link Toolkit} implementation.
  */
 public class LanternaToolkit extends Toolkit {
 
-    private final Terminal terminal;
+    private final TerminalScreen screen;
     private final EventWorker eventWorker;
 
     private boolean isCursorVisible;
     private int cursorX;
     private int cursorY;
     
-    
-    public LanternaToolkit() {
-        terminal = TerminalFacade.createTerminal();
+    public LanternaToolkit(final Terminal terminal) throws IOException {
+        screen = new TerminalScreen(terminal);
         eventWorker = new EventWorker();
 
         setDefaultToolkit(this);
     }
+
+    private TextColor getTextColor(final int code) {
+        switch (code) {
+            case 0:
+                return TextColor.ANSI.BLACK;
+            case 1:
+                return TextColor.ANSI.RED;
+            case 2:
+                return TextColor.ANSI.GREEN;
+            case 3:
+                return TextColor.ANSI.YELLOW;
+            case 4:
+                return TextColor.ANSI.BLUE;
+            case 5:
+                return TextColor.ANSI.MAGENTA;
+            case 6:
+                return TextColor.ANSI.CYAN;
+            case 7:
+                return TextColor.ANSI.WHITE;
+
+            default:
+                return TextColor.ANSI.DEFAULT;
+        }
+    }
+
+    private TextCharacter getTextCharacter(final int chr, final int attrib) {
+        final TextColor foregroundColor = getTextColor(attrib & 0x07);
+        final TextColor backgroundColor = getTextColor((attrib >>> 4) & 0x07);
+
+        if ((attrib & 0x08) != 0) {
+            return new TextCharacter(mapVirtualSign((char) chr),
+                                     foregroundColor,
+                                     backgroundColor,
+                                     SGR.BOLD);
+        }
+
+        return new TextCharacter(mapVirtualSign((char) chr),
+                                 foregroundColor,
+                                 backgroundColor);
+    }
     
     protected void drawChar(int x, int y, int chr, int attrib) {
-        terminal.applyBackgroundColor((attrib >>> 4) & 0x0f);
-        terminal.applyForegroundColor(attrib & 0x0f);
-        
-        terminal.moveCursor(x, y);
-        terminal.putCharacter(mapVirtualSign((char)chr));
+        screen.setCharacter(x, y, getTextCharacter(chr, attrib));
     }
 
     protected void drawString(int x, int y, String str, int attrib) {
-        terminal.applyBackgroundColor((attrib >>> 4) & 0x0f);
-        terminal.applyForegroundColor(attrib & 0x0f);
-        
-        terminal.moveCursor(x, y);
-        
         for (int i = 0, count = str.length(); i < count; i++) {
-            terminal.putCharacter(mapVirtualSign(str.charAt(i)));
+            screen.setCharacter(x + i,
+                                y,
+                                getTextCharacter(str.charAt(i), attrib));
         }
     }
 
     protected void drawLine(int x, int y, int length, int chr, 
             int attrib, boolean isHorizontal) {
-        
-        terminal.applyBackgroundColor((attrib >>> 4) & 0x0f);
-        terminal.applyForegroundColor(attrib & 0x0f);
-        
-        terminal.moveCursor(x, y);
-        
+
+        final TextCharacter textChar = getTextCharacter(chr, attrib);
+
         for (int i = 0; i < length; i++) {
-            if (!isHorizontal) {
-                terminal.moveCursor(x, y + i);
+            if (isHorizontal) {
+                screen.setCharacter(x + i, y, textChar);
+            } else {
+                screen.setCharacter(x, y + i, textChar);
             }
-                
-            terminal.putCharacter(mapVirtualSign((char)chr));
         }
     }
 
     protected void fillBox(int x, int y, int width, int height, int attrib) {
-        terminal.applyBackgroundColor((attrib >>> 4) & 0x0f);
-        terminal.applyForegroundColor(attrib & 0x0f);
-        
+        final TextCharacter textChar = getTextCharacter(' ', attrib);
+
         for (int j = 0; j < height; j++) {
-            terminal.moveCursor(x, y + j);
+            screen.setCursorPosition(new TerminalPosition(x, y + j));
             
             for (int i = 0; i < width; i++) {
-                terminal.putCharacter(' ');
+                screen.setCharacter(x + i, y + j, textChar);
             }
         }
     }
@@ -105,7 +137,7 @@ public class LanternaToolkit extends Toolkit {
         cursorX = x;
         cursorY = y;
         
-        terminal.moveCursor(x, y);
+        screen.setCursorPosition(new TerminalPosition(x, y));
     }
 
     protected boolean isCursorVisible() {
@@ -114,7 +146,10 @@ public class LanternaToolkit extends Toolkit {
     
     protected void setCursorVisible(boolean isVisible) {
         this.isCursorVisible = isVisible;
-        terminal.setCursorVisible(isVisible);
+
+        screen.setCursorPosition(isVisible ? new TerminalPosition(
+                cursorX,
+                cursorY) : null);
     }
     
     /**
@@ -125,7 +160,11 @@ public class LanternaToolkit extends Toolkit {
     }
 
     protected void sync() {
-        terminal.flush();
+        try {
+            screen.refresh();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     protected void closeWindow(LanternaWindow window) {
@@ -151,7 +190,7 @@ public class LanternaToolkit extends Toolkit {
     }
 
     public Dimension getScreenSize() {
-        final TerminalSize size = terminal.getTerminalSize();
+        final TerminalSize size = screen.getTerminalSize();
         return new Dimension(size.getColumns(), size.getRows());
     }
     
@@ -162,68 +201,68 @@ public class LanternaToolkit extends Toolkit {
     private char mapVirtualSign(char key) {
         switch (key) {
         // single box
-        case GraphicsConstants.VS_ULCORNER:     return ACS.SINGLE_LINE_UP_LEFT_CORNER;
-        case GraphicsConstants.VS_LLCORNER:     return ACS.SINGLE_LINE_LOW_LEFT_CORNER;
-        case GraphicsConstants.VS_URCORNER:     return ACS.SINGLE_LINE_UP_RIGHT_CORNER;
-        case GraphicsConstants.VS_LRCORNER:     return ACS.SINGLE_LINE_LOW_RIGHT_CORNER;
-        case GraphicsConstants.VS_LTEE:         return ACS.SINGLE_LINE_T_RIGHT;
-        case GraphicsConstants.VS_RTEE:         return ACS.SINGLE_LINE_T_LEFT;
-        case GraphicsConstants.VS_BTEE:         return ACS.SINGLE_LINE_T_UP;
-        case GraphicsConstants.VS_TTEE:         return ACS.SINGLE_LINE_T_DOWN;
-        case GraphicsConstants.VS_HLINE:        return ACS.SINGLE_LINE_HORIZONTAL;
-        case GraphicsConstants.VS_VLINE:        return ACS.SINGLE_LINE_VERTICAL;
-        case GraphicsConstants.VS_CROSS:        return ACS.SINGLE_LINE_CROSS;
+        case GraphicsConstants.VS_ULCORNER:     return Symbols.SINGLE_LINE_TOP_LEFT_CORNER;
+        case GraphicsConstants.VS_LLCORNER:     return Symbols.SINGLE_LINE_BOTTOM_LEFT_CORNER;
+        case GraphicsConstants.VS_URCORNER:     return Symbols.SINGLE_LINE_TOP_RIGHT_CORNER;
+        case GraphicsConstants.VS_LRCORNER:     return Symbols.SINGLE_LINE_BOTTOM_RIGHT_CORNER;
+        case GraphicsConstants.VS_LTEE:         return Symbols.SINGLE_LINE_T_RIGHT;
+        case GraphicsConstants.VS_RTEE:         return Symbols.SINGLE_LINE_T_LEFT;
+        case GraphicsConstants.VS_BTEE:         return Symbols.SINGLE_LINE_T_UP;
+        case GraphicsConstants.VS_TTEE:         return Symbols.SINGLE_LINE_T_DOWN;
+        case GraphicsConstants.VS_HLINE:        return Symbols.SINGLE_LINE_HORIZONTAL;
+        case GraphicsConstants.VS_VLINE:        return Symbols.SINGLE_LINE_VERTICAL;
+        case GraphicsConstants.VS_CROSS:        return Symbols.SINGLE_LINE_CROSS;
 
         // double box
-        case GraphicsConstants.VS_DBL_ULCORNER: return ACS.DOUBLE_LINE_UP_LEFT_CORNER;
-        case GraphicsConstants.VS_DBL_LLCORNER: return ACS.DOUBLE_LINE_LOW_LEFT_CORNER;
-        case GraphicsConstants.VS_DBL_URCORNER: return ACS.DOUBLE_LINE_UP_RIGHT_CORNER;
-        case GraphicsConstants.VS_DBL_LRCORNER: return ACS.DOUBLE_LINE_LOW_RIGHT_CORNER;
-        case GraphicsConstants.VS_DBL_LTEE:     return ACS.DOUBLE_LINE_T_RIGHT;
-        case GraphicsConstants.VS_DBL_RTEE:     return ACS.DOUBLE_LINE_T_LEFT;
-        case GraphicsConstants.VS_DBL_BTEE:     return ACS.DOUBLE_LINE_T_UP;
-        case GraphicsConstants.VS_DBL_TTEE:     return ACS.DOUBLE_LINE_T_DOWN;
-        case GraphicsConstants.VS_DBL_HLINE:    return ACS.DOUBLE_LINE_HORIZONTAL;
-        case GraphicsConstants.VS_DBL_VLINE:    return ACS.DOUBLE_LINE_VERTICAL;
-        case GraphicsConstants.VS_DBL_CROSS:    return ACS.DOUBLE_LINE_CROSS;
+        case GraphicsConstants.VS_DBL_ULCORNER: return Symbols.DOUBLE_LINE_TOP_LEFT_CORNER;
+        case GraphicsConstants.VS_DBL_LLCORNER: return Symbols.DOUBLE_LINE_BOTTOM_LEFT_CORNER;
+        case GraphicsConstants.VS_DBL_URCORNER: return Symbols.DOUBLE_LINE_TOP_RIGHT_CORNER;
+        case GraphicsConstants.VS_DBL_LRCORNER: return Symbols.DOUBLE_LINE_BOTTOM_RIGHT_CORNER;
+        case GraphicsConstants.VS_DBL_LTEE:     return Symbols.DOUBLE_LINE_T_RIGHT;
+        case GraphicsConstants.VS_DBL_RTEE:     return Symbols.DOUBLE_LINE_T_LEFT;
+        case GraphicsConstants.VS_DBL_BTEE:     return Symbols.DOUBLE_LINE_T_UP;
+        case GraphicsConstants.VS_DBL_TTEE:     return Symbols.DOUBLE_LINE_T_DOWN;
+        case GraphicsConstants.VS_DBL_HLINE:    return Symbols.DOUBLE_LINE_HORIZONTAL;
+        case GraphicsConstants.VS_DBL_VLINE:    return Symbols.DOUBLE_LINE_VERTICAL;
+        case GraphicsConstants.VS_DBL_CROSS:    return Symbols.DOUBLE_LINE_CROSS;
         
         // single separator corners for double box
-        case GraphicsConstants.VS_DBL_LSEP:     return ACS.DOUBLE_LINE_T_SINGLE_RIGHT;
-        case GraphicsConstants.VS_DBL_RSEP:     return ACS.DOUBLE_LINE_T_SINGLE_LEFT;
-        case GraphicsConstants.VS_DBL_TSEP:     return ACS.DOUBLE_LINE_T_SINGLE_DOWN;
-        case GraphicsConstants.VS_DBL_BSEP:     return ACS.DOUBLE_LINE_T_SINGLE_UP;
+        case GraphicsConstants.VS_DBL_LSEP:     return Symbols.DOUBLE_LINE_T_SINGLE_RIGHT;
+        case GraphicsConstants.VS_DBL_RSEP:     return Symbols.DOUBLE_LINE_T_SINGLE_LEFT;
+        case GraphicsConstants.VS_DBL_TSEP:     return Symbols.DOUBLE_LINE_T_SINGLE_DOWN;
+        case GraphicsConstants.VS_DBL_BSEP:     return Symbols.DOUBLE_LINE_T_SINGLE_UP;
         
         // double separator corners for single box
-        case GraphicsConstants.VS_L_DBLSEP:     return ACS.SINGLE_LINE_T_DOUBLE_RIGHT;
-        case GraphicsConstants.VS_R_DBLSEP:     return ACS.SINGLE_LINE_T_DOUBLE_LEFT;
-        case GraphicsConstants.VS_T_DBLSEP:     return ACS.SINGLE_LINE_T_DOUBLE_DOWN;
-        case GraphicsConstants.VS_B_DBLSEP:     return ACS.SINGLE_LINE_T_DOUBLE_UP;
+        case GraphicsConstants.VS_L_DBLSEP:     return Symbols.SINGLE_LINE_T_DOUBLE_RIGHT;
+        case GraphicsConstants.VS_R_DBLSEP:     return Symbols.SINGLE_LINE_T_DOUBLE_LEFT;
+        case GraphicsConstants.VS_T_DBLSEP:     return Symbols.SINGLE_LINE_T_DOUBLE_DOWN;
+        case GraphicsConstants.VS_B_DBLSEP:     return Symbols.SINGLE_LINE_T_DOUBLE_UP;
         
         // other graphical symbols
-        case GraphicsConstants.VS_ARROW_DOWN:   return ACS.ARROW_DOWN;
-        case GraphicsConstants.VS_ARROW_UP:     return ACS.ARROW_UP;
-        case GraphicsConstants.VS_ARROW_RIGHT:  return ACS.ARROW_RIGHT;
-        case GraphicsConstants.VS_ARROW_LEFT:   return ACS.ARROW_LEFT;
+        case GraphicsConstants.VS_ARROW_DOWN:   return Symbols.ARROW_DOWN;
+        case GraphicsConstants.VS_ARROW_UP:     return Symbols.ARROW_UP;
+        case GraphicsConstants.VS_ARROW_RIGHT:  return Symbols.ARROW_RIGHT;
+        case GraphicsConstants.VS_ARROW_LEFT:   return Symbols.ARROW_LEFT;
         case GraphicsConstants.VS_DOWN:         return 0x25BC;
         case GraphicsConstants.VS_UP:           return 0x25B2;
         case GraphicsConstants.VS_RIGHT:        return 0x25BA;
         case GraphicsConstants.VS_LEFT:         return 0x25C4;
         
-        case GraphicsConstants.VS_WTBOARD:      return ACS.BLOCK_SPARSE;
-        case GraphicsConstants.VS_CKBOARD:      return ACS.BLOCK_MIDDLE;
-        case GraphicsConstants.VS_BOARD:        return ACS.BLOCK_DENSE;
-        case GraphicsConstants.VS_BLBOARD:      return ACS.BLOCK_SOLID;
+        case GraphicsConstants.VS_WTBOARD:      return Symbols.BLOCK_SPARSE;
+        case GraphicsConstants.VS_CKBOARD:      return Symbols.BLOCK_MIDDLE;
+        case GraphicsConstants.VS_BOARD:        return Symbols.BLOCK_DENSE;
+        case GraphicsConstants.VS_BLBOARD:      return Symbols.BLOCK_SOLID;
 
         case GraphicsConstants.VS_TICK:         return 0x221A;
-        case GraphicsConstants.VS_RADIO:        return ACS.DOT;
+        case GraphicsConstants.VS_RADIO:        return Symbols.BULLET;
         }
         
         return key;
     }
     
-    private int mapVirtualKey(Key key) {
-        switch (key.getKind()) {
-        case NormalKey:     return key.getCharacter();
+    private int mapVirtualKey(KeyStroke key) {
+        switch (key.getKeyType()) {
+        case Character:     return key.getCharacter();
         
         case Escape:        return KeyEvent.VK_ESCAPE;
         case Backspace:     return KeyEvent.VK_BACK_SPACE;
@@ -253,6 +292,13 @@ public class LanternaToolkit extends Toolkit {
         case F10:           return KeyEvent.VK_F10;
         case F11:           return KeyEvent.VK_F11;
         case F12:           return KeyEvent.VK_F12;
+        case F13:           return KeyEvent.VK_F13;
+        case F14:           return KeyEvent.VK_F14;
+        case F15:           return KeyEvent.VK_F15;
+        case F16:           return KeyEvent.VK_F16;
+        case F17:           return KeyEvent.VK_F17;
+        case F18:           return KeyEvent.VK_F18;
+        case F19:           return KeyEvent.VK_F19;
         }
         
         return KeyEvent.VK_UNDEFINED;
@@ -283,33 +329,39 @@ public class LanternaToolkit extends Toolkit {
 
         public void run() {
             running = true;
-            terminal.enterPrivateMode();
-
             try {
-                terminal.clearScreen();
-                terminal.moveCursor(0, 0);
-                
-                final EventQueue eventQueue = EventQueue.getInstance();
-                
-                while (!stopRequest) {
-                    final Key key = terminal.readInput();
-                    if (key != null) {
-                        processKeyEvent(getTopWindow(), mapVirtualKey(key), 0);
-                    }
-                    
-                    if (!eventQueue.isEmpty()) {
-                        processIdleEvent();
+                screen.startScreen();
 
-                    } else {
-                        try {
-                            Thread.sleep(100);
-                        } catch (InterruptedException e) {
-                            stopRequest();
+                try {
+                    //screen.clear();
+                    //screen.setCursorPosition(new TerminalPosition(0, 0));
+
+                    final EventQueue eventQueue = EventQueue.getInstance();
+
+                    while (!stopRequest) {
+                        final KeyStroke keyStroke = screen.pollInput();
+                        if (keyStroke != null) {
+                            processKeyEvent(getTopWindow(),
+                                            mapVirtualKey(keyStroke),
+                                            0);
+                        }
+
+                        if (!eventQueue.isEmpty()) {
+                            processIdleEvent();
+
+                        } else {
+                            try {
+                                Thread.sleep(100);
+                            } catch (InterruptedException e) {
+                                stopRequest();
+                            }
                         }
                     }
+                } finally {
+                    screen.stopScreen();
                 }
-            } finally {
-                terminal.exitPrivateMode();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
             }
         }
     }

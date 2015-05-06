@@ -17,19 +17,26 @@
 
 package charva.demo;
 
+import java.io.IOException;
 import charva.awt.event.ActionEvent;
 import charva.awt.event.ActionListener;
 import charva.showcase.Tutorial;
 import charva.toolkit.lanterna.LanternaToolkit;
 import charvax.swing.SwingUtilities;
+import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
 
 /**
  * Defines entry point for the charva-lanterna demo application.
  */
 public class CharvaDemoApp {
 
-    public static void main(String[] args) {
-        final LanternaToolkit toolkit = new LanternaToolkit();
+    public static void main(String[] args) throws IOException {
+        final DefaultTerminalFactory factory = new DefaultTerminalFactory();
+        //factory.setSuppressSwingTerminalFrame(true);
+
+        final LanternaToolkit toolkit = new LanternaToolkit(
+                factory.createTerminal());
+
         toolkit.startEventThread();
 
         SwingUtilities.invokeLater(new Runnable() {
