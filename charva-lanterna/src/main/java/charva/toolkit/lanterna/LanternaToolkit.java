@@ -170,10 +170,10 @@ public class LanternaToolkit extends Toolkit {
     protected void closeWindow(LanternaWindow window) {
         // repaint the main window in stack, 
         // this will torn out to repaint other windows
-//        Window[] winList = toolkit.getWindows();
-//        if (winList.length > 0) {
-//            winList[0].repaint();
-//        }
+        Window[] winList = getWindows();
+        if (winList.length > 0) {
+            winList[0].repaint();
+        }
     }
 
     protected void showWindow(LanternaWindow window) {

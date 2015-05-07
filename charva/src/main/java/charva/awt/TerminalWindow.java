@@ -78,6 +78,14 @@ public abstract class TerminalWindow {
         charvaWindow.showInternal();
     }
 
+    protected void paint() {
+        // validate first, in case invalidate() was called
+        charvaWindow.validate();
+
+        Graphics g = getGraphics();
+        charvaWindow.paint(g);
+    }
+
     protected void processIdleEvent() {
         Toolkit.getDefaultToolkit().processIdleEvent();
     }

@@ -239,12 +239,10 @@ public class Window extends Container {
             toolkit.addWindow(this);
             addNotify();
 
-            validate();
-            Graphics g = peer.getGraphics();
-            paint(g);
-            
-            toolkit.getSystemEventQueue().postEvent(new WindowEvent(
-                    this, WindowEvent.WINDOW_OPENED));
+            repaint();
+
+            toolkit.getSystemEventQueue().postEvent(new WindowEvent(this,
+                                                                    WindowEvent.WINDOW_OPENED));
         }
     }
     
@@ -430,11 +428,24 @@ public class Window extends Container {
             // the component
             ancestor = ((Component)source).getAncestorWindow();
             if (ancestor.peer != null && ancestor.isVisible()) {
-                // validate first, in case invalidate() was called
-                ancestor.validate();
-                Graphics g = ancestor.peer.getGraphics();
-                ancestor.paint(g);
-                
+                LinkedList winlist = ancestor.toolkit.getWindowList();
+                synchronized (winlist) {
+                    // ignore windows that are stacked below this ancestor
+                    Iterator iter = winlist.iterator();
+                    boolean belowAncestor = true;
+                    while (iter.hasNext()) {
+                        Window w = (Window)iter.next();
+                        if (w == ancestor) {
+                            belowAncestor = false;
+                        }
+
+                        // paint all windows above including this ancestor
+                        if (!belowAncestor) {
+                            w.peer.paint();
+                        }
+                    }
+                }
+
                 // Post peer sync action onto the AWT queue, thus requesting
                 // a refresh of the physical screen
                 ancestor.toolkit.getSystemEventQueue().postEvent(
@@ -458,23 +469,7 @@ public class Window extends Container {
             }
             
             if (ancestor.peer != null && ancestor.isVisible()) {
-                LinkedList winlist = ancestor.toolkit.getWindowList();
-                synchronized (winlist) {
-                    // ignore windows that are stacked below this ancestor
-                    Iterator iter = winlist.iterator();
-                    boolean skip = true;
-                    while (iter.hasNext()) {
-                        Window w = (Window)iter.next();
-                        if (w == ancestor) {
-                            skip = false;
-                        }
-                        
-                        // sync all windows above including this ancestor
-                        if (!skip) {
-                            w.peer.sync();
-                        }
-                    }
-                }
+                ancestor.peer.sync();
             }
             break;
 
@@ -496,7 +491,7 @@ public class Window extends Container {
         
         return true;
     }
-    
+
     /**
      * Returns the same location as getLocation() method returns.
      */
