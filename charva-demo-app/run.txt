@@ -1,0 +1,2 @@
+cd target
+java -Djava.awt.headless=true -jar charva-demo.jar

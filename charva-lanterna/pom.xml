@@ -46,7 +46,12 @@
             <groupId>com.googlecode.lanterna</groupId>
             <artifactId>lanterna</artifactId>
             <version>3.0.0-alpha6</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>junit</groupId>
+                    <artifactId>junit</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
     </dependencies>
-
 </project>
