@@ -1,56 +1,57 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-  <modelVersion>4.0.0</modelVersion>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
 
-  <groupId>com.github.charva-lanterna</groupId>
-  <artifactId>charva</artifactId>
-  <version>2.0.0-SNAPSHOT</version>
-  <packaging>bundle</packaging>
-  
-  <name>${project.artifactId}</name>
-  <description>Swing-like terminal UI library</description>
+    <groupId>com.github.charva-lanterna</groupId>
+    <artifactId>charva</artifactId>
+    <version>2.0.0-SNAPSHOT</version>
+    <packaging>bundle</packaging>
 
-  <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-  </properties>
+    <name>${project.artifactId}</name>
+    <description>Swing-like terminal UI library</description>
 
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <version>2.3.2</version>
-        <configuration>
-          <source>1.4</source>
-          <target>1.4</target>
-        </configuration>
-      </plugin>
-      
-      <plugin>
-        <groupId>org.apache.felix</groupId>
-        <artifactId>maven-bundle-plugin</artifactId>
-        <version>2.1.0</version>
-        <extensions>true</extensions>
-        <configuration>
-          <instructions>
-            <Bundle-Name>${project.name}</Bundle-Name>
-            <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
-            <Bundle-RequiredExecutionEnvironment>
-              J2SE-1.4,J2SE-1.5,JavaSE-1.6
-            </Bundle-RequiredExecutionEnvironment>
-            <Export-Package>
-              charva.awt.*;version="2.0.0",
-              charvax.swing.*;version="2.0.0"
-            </Export-Package>
-            <Import-Package>
-              charva.awt.*;version="[2.0,3.0)",
-              charvax.swing.*;version="[2.0,3.0)"
-            </Import-Package>
-          </instructions>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>  
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>2.3.2</version>
+                <configuration>
+                    <source>1.4</source>
+                    <target>1.4</target>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <version>2.1.0</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <instructions>
+                        <Bundle-Name>${project.name}</Bundle-Name>
+                        <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+                        <Bundle-RequiredExecutionEnvironment>
+                            J2SE-1.4,J2SE-1.5,JavaSE-1.6
+                        </Bundle-RequiredExecutionEnvironment>
+                        <Export-Package>
+                            charva.awt.*;version="2.0.0",
+                            charvax.swing.*;version="2.0.0"
+                        </Export-Package>
+                        <Import-Package>
+                            charva.awt.*;version="[2.0,3.0)",
+                            charvax.swing.*;version="[2.0,3.0)"
+                        </Import-Package>
+                    </instructions>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>

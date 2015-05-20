@@ -241,8 +241,8 @@ public class Window extends Container {
 
             repaint();
 
-            toolkit.getSystemEventQueue().postEvent(new WindowEvent(this,
-                                                                    WindowEvent.WINDOW_OPENED));
+            toolkit.getSystemEventQueue().postEvent(
+                    new WindowEvent(this, WindowEvent.WINDOW_OPENED));
         }
     }
     
