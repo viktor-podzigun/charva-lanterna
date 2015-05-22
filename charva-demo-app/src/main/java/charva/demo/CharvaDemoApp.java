@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
+import javax.swing.WindowConstants;
 import charva.awt.event.ActionEvent;
 import charva.awt.event.ActionListener;
 import charva.showcase.Tutorial;
@@ -90,6 +91,8 @@ public final class CharvaDemoApp {
                 SwingTerminalColorConfiguration.DEFAULT,
                 SwingTerminalFrame.AutoCloseTrigger.CloseOnExitPrivateMode);
 
+        swingTerminalFrame.setDefaultCloseOperation(
+                WindowConstants.EXIT_ON_CLOSE);
         swingTerminalFrame.setVisible(true);
         return swingTerminalFrame;
     }

@@ -173,6 +173,19 @@ public class Tutorial extends JFrame implements ActionListener {
 
         JPanel labelPanel = new JPanel();
         labelPanel.setLayout(new BoxLayout(labelPanel, BoxLayout.Y_AXIS));
+        // character graphics generated here:
+        // http://patorjk.com/software/taag/#p=display&h=1&v=1&f=Standard&t=charva-%0Alanterna
+        labelPanel.add(new JLabel("       _                                       "));
+        labelPanel.add(new JLabel("  ___ | |__    __ _  _ __ __   __ __ _         "));
+        labelPanel.add(new JLabel(" / __|| '_ \\  / _` || '__|\\ \\ / // _` | _____  "));
+        labelPanel.add(new JLabel("| (__ | | | || (_| || |    \\ V /| (_| ||_____| "));
+        labelPanel.add(new JLabel(" \\___||_| |_| \\__,_||_|     \\_/  \\__,_|        "));
+        labelPanel.add(new JLabel(" _                _                            "));
+        labelPanel.add(new JLabel("| |  __ _  _ __  | |_  ___  _ __  _ __    __ _ "));
+        labelPanel.add(new JLabel("| | / _` || '_ \\ | __|/ _ \\| '__|| '_ \\  / _` |"));
+        labelPanel.add(new JLabel("| || (_| || | | || |_|  __/| |   | | | || (_| |"));
+        labelPanel.add(new JLabel("|_| \\__,_||_| |_| \\__|\\___||_|   |_| |_| \\__,_|"));
+        labelPanel.add(new JLabel(""));
         labelPanel.add(new JLabel("Use LEFT and RIGHT cursor keys to select a menu."));
         labelPanel.add(new JLabel("Use ENTER to invoke a menu or menu-item."));
         labelPanel.add(new JLabel("(You can also use the " +

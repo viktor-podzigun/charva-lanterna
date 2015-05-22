@@ -64,7 +64,7 @@ public class JPopupMenu extends JComponent {
     /**
      * Appends the specified menu item to the end of this menu. 
      *
-     * @param c the <code>JMenuItem</code> to add
+     * @param menuItem the <code>JMenuItem</code> to add
      * @return the <code>JMenuItem</code> added
      */
     public JMenuItem add(JMenuItem menuItem) {
