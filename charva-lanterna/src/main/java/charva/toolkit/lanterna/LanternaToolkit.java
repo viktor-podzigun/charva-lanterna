@@ -330,7 +330,6 @@ public class LanternaToolkit extends Toolkit {
         public void run() {
             running = true;
             try {
-                screen.getTerminal().enterPrivateMode();
                 screen.startScreen();
 
                 try {
@@ -360,7 +359,6 @@ public class LanternaToolkit extends Toolkit {
                     }
                 } finally {
                     screen.stopScreen();
-                    screen.getTerminal().exitPrivateMode();
                 }
             } catch (IOException e) {
                 throw new RuntimeException(e);
