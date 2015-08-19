@@ -57,25 +57,25 @@ public class LanternaToolkit extends Toolkit {
 
     private TextColor getTextColor(final int code) {
         switch (code) {
-            case 0:
-                return TextColor.ANSI.BLACK;
-            case 1:
-                return TextColor.ANSI.RED;
-            case 2:
-                return TextColor.ANSI.GREEN;
-            case 3:
-                return TextColor.ANSI.YELLOW;
-            case 4:
-                return TextColor.ANSI.BLUE;
-            case 5:
-                return TextColor.ANSI.MAGENTA;
-            case 6:
-                return TextColor.ANSI.CYAN;
-            case 7:
-                return TextColor.ANSI.WHITE;
+        case 0:
+            return TextColor.ANSI.BLACK;
+        case 1:
+            return TextColor.ANSI.BLUE;
+        case 2:
+            return TextColor.ANSI.GREEN;
+        case 3:
+            return TextColor.ANSI.CYAN;
+        case 4:
+            return TextColor.ANSI.RED;
+        case 5:
+            return TextColor.ANSI.MAGENTA;
+        case 6:
+            return TextColor.ANSI.YELLOW;
+        case 7:
+            return TextColor.ANSI.WHITE;
 
-            default:
-                return TextColor.ANSI.DEFAULT;
+        default:
+            return TextColor.ANSI.DEFAULT;
         }
     }
 

@@ -23,7 +23,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
+import java.util.Properties;
 import javax.swing.WindowConstants;
+import charva.awt.ColorScheme;
+import charva.awt.Toolkit;
 import charva.awt.event.ActionEvent;
 import charva.awt.event.ActionListener;
 import charva.showcase.Tutorial;
@@ -56,6 +59,8 @@ public final class CharvaDemoApp {
         final LanternaToolkit toolkit = new LanternaToolkit(createTerminal());
         toolkit.startEventThread();
 
+        setColors();
+
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
@@ -68,6 +73,32 @@ public final class CharvaDemoApp {
                 tutorial.show();
             }
         });
+    }
+
+    private void setColors() throws IOException {
+        final ColorScheme normalColors = loadColors("/blue-colors.properties");
+        if (normalColors != null) {
+            Toolkit.setNormalColors(normalColors);
+        }
+    }
+
+    private ColorScheme loadColors(final String colorsFileName) throws IOException {
+        InputStream colorsStream = null;
+        try {
+            colorsStream = getClass().getResourceAsStream(colorsFileName);
+            if (colorsStream == null) {
+                return null;
+            }
+
+            final Properties properties = new Properties();
+            properties.load(colorsStream);
+            return new ColorScheme(properties);
+
+        } finally {
+            if (colorsStream != null) {
+                colorsStream.close();
+            }
+        }
     }
 
     private Terminal createTerminal() throws IOException {
