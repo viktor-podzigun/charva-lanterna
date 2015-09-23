@@ -10,3 +10,4 @@ mvn clean package
 ```bash
 java -Djava.awt.headless=true -jar ./charva-demo-app/target/charva-demo.jar
 ```
+![](https://github.com/viktor-podzigun/charva-lanterna/blob/master/charva-demo-app/doc/screenshot.png)
