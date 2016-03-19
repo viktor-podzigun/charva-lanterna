@@ -1,4 +1,7 @@
-### charva-lanterna
+charva-lanterna
+===============
+[![Build Status](https://travis-ci.org/viktor-podzigun/charva-lanterna.svg?branch=master)](https://travis-ci.org/viktor-podzigun/charva-lanterna)
+
 Making [CHARVA UI](http://sourceforge.net/projects/charva/) 100% Java by using [lanterna terminal](https://github.com/mabe02/lanterna) library
 
 ### Build
