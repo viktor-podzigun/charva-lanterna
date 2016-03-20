@@ -35,10 +35,11 @@ import charvax.swing.SwingUtilities;
 import com.googlecode.lanterna.terminal.Terminal;
 import com.googlecode.lanterna.terminal.ansi.CygwinTerminal;
 import com.googlecode.lanterna.terminal.ansi.UnixTerminal;
-import com.googlecode.lanterna.terminal.swing.SwingTerminalColorConfiguration;
-import com.googlecode.lanterna.terminal.swing.SwingTerminalDeviceConfiguration;
+import com.googlecode.lanterna.terminal.swing.TerminalEmulatorColorConfiguration;
+import com.googlecode.lanterna.terminal.swing.TerminalEmulatorDeviceConfiguration;
 import com.googlecode.lanterna.terminal.swing.SwingTerminalFontConfiguration;
 import com.googlecode.lanterna.terminal.swing.SwingTerminalFrame;
+import com.googlecode.lanterna.terminal.swing.TerminalEmulatorAutoCloseTrigger;
 
 /**
  * Defines entry point for the charva-lanterna demo application.
@@ -117,10 +118,10 @@ public final class CharvaDemoApp {
 
         SwingTerminalFrame swingTerminalFrame = new SwingTerminalFrame(
                 "charva-lanterna Demo",
-                SwingTerminalDeviceConfiguration.DEFAULT,
-                SwingTerminalFontConfiguration.DEFAULT,
-                SwingTerminalColorConfiguration.DEFAULT,
-                SwingTerminalFrame.AutoCloseTrigger.CloseOnExitPrivateMode);
+                TerminalEmulatorDeviceConfiguration.getDefault(),
+                SwingTerminalFontConfiguration.getDefault(),
+                TerminalEmulatorColorConfiguration.getDefault(),
+                TerminalEmulatorAutoCloseTrigger.CloseOnExitPrivateMode);
 
         swingTerminalFrame.setDefaultCloseOperation(
                 WindowConstants.EXIT_ON_CLOSE);
@@ -144,16 +145,6 @@ public final class CharvaDemoApp {
                 Charset terminalCharset) throws IOException {
 
             super(terminalInput, terminalOutput, terminalCharset);
-        }
-
-        @Override
-        protected String getSTTYCommand() {
-            return findProgram("stty.exe");
-        }
-
-        @Override
-        protected String getShellCommand() {
-            return findProgram("sh.exe");
         }
 
         private static String findProgram(String programName) {
