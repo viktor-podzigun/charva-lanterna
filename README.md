@@ -13,7 +13,31 @@ mvn clean package
 ```bash
 java -Djava.awt.headless=true -jar ./charva-demo-app/target/charva-demo.jar
 ```
-![](https://github.com/viktor-podzigun/charva-lanterna/blob/master/charva-demo-app/doc/screenshot.png)
+![](charva-demo-app/doc/screenshot.png)
+
+### Changes to the original CHARVA UI project
+
+There was some refactoring of original Charva code done. Most of the changes were done to the
+internal code and should not break client/API interface much.
+
+The idea of these changes is to make the Charva as close to Swing as possible. From both,
+the client/API side, and the internal side. To make it easier to support/migrate the components
+in the future.
+
+Here are the list of the changes:
+
+1. Structure/modules changes
+
+2. Code changes
+
+3. New/Added staff
+
+    draw method for each component
+    renaming it to paint
+    adding Graphics class
+    adding plaf package to follow javax.swing structure
+    making other changes
+
 
 ### How to track the beginning of charva-lanterna back to CHARVA UI
 
