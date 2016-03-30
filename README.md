@@ -15,22 +15,52 @@ java -Djava.awt.headless=true -jar ./charva-demo-app/target/charva-demo.jar
 ```
 ![](charva-demo-app/doc/screenshot.png)
 
+### List of supported components
+
+* [JButton](charva/src/main/java/charvax/swing/JButton.java)
+* [JCheckBox](charva/src/main/java/charvax/swing/JCheckBox.java)
+* [JCheckBoxMenuItem](charva/src/main/java/charvax/swing/JCheckBoxMenuItem.java)
+* [JComboBox](charva/src/main/java/charvax/swing/JComboBox.java)
+* [JComponent](charva/src/main/java/charvax/swing/JComponent.java)
+* [JDialog](charva/src/main/java/charvax/swing/JDialog.java)
+* JFileChooser //TODO
+* [JFrame](charva/src/main/java/charvax/swing/JFrame.java)
+* [JLabel](charva/src/main/java/charvax/swing/JLabel.java)
+* [JList](charva/src/main/java/charvax/swing/JList.java)
+* [JMenu](charva/src/main/java/charvax/swing/JMenu.java)
+* [JMenuBar](charva/src/main/java/charvax/swing/JMenuBar.java)
+* [JMenuItem](charva/src/main/java/charvax/swing/JMenuItem.java)
+* [JOptionPane](charva/src/main/java/charvax/swing/JOptionPane.java)
+* [JPanel](charva/src/main/java/charvax/swing/JPanel.java)
+* [JPasswordField](charva/src/main/java/charvax/swing/JPasswordField.java)
+* [JPopupMenu](charva/src/main/java/charvax/swing/JPopupMenu.java)
+* [JProgressBar](charva/src/main/java/charvax/swing/JProgressBar.java)
+* [JRadioButton](charva/src/main/java/charvax/swing/JRadioButton.java)
+* [JScrollBar](charva/src/main/java/charvax/swing/JScrollBar.java)
+* [JScrollPane](charva/src/main/java/charvax/swing/JScrollPane.java)
+* [JSeparator](charva/src/main/java/charvax/swing/JSeparator.java)
+* [JTabbedPane](charva/src/main/java/charvax/swing/JTabbedPane.java)
+* JTable //TODO
+* JTextArea //TODO
+* [JTextField](charva/src/main/java/charvax/swing/JTextField.java)
+* JTextComponent //TODO
+
 ### Changes to the original CHARVA UI project
 
-There was some refactoring of original Charva code done. Most of the changes were done to the
+There was some refactoring done of original Charva code. Most of the changes were done to the
 internal code and should not break client/API interface much.
 
 The idea of these changes is to make the Charva as close to Swing as possible. From both,
-the client/API side, and the internal side. To make it easier to support/migrate the components
+the client/API side, and the internal side, and to make it easier to support/migrate the components
 in the future.
 
-Here are the list of the changes:
+Here is the short summary of the changes:
 
-1. Structure/modules changes
+#### Structure/modules changes
 
-2. Code changes
+#### Code changes
 
-3. New/Added staff
+#### New/Added staff
 
     draw method for each component
     renaming it to paint
