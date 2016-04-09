@@ -36,3 +36,17 @@ git checkout refs/tags/sourceforge-svn-trunk-r95
 git cherry-pick $(git rev-list master | tail -1)
 git replace $(git rev-list master | tail -1) HEAD
 ```
+
+### Alternative solutions to "graphical" user interfaces on the terminal
+
+Overview of the alternative solutions to porting to the terminal applications having a graphical user interface written using Java packages `java.awt` and/or `javax.swing`:
+
+* Modify the source code of the application replacing `java.awt` and `java.swing` with `charva.awt` and `charvax.swing`, then provide `charva.awt` and `charvax.swing` via [CHARVA UI](http://sourceforge.net/projects/charva/), that is implemented using GNU ncurses via JNI.
+
+* Modify the source code of the application replacing `java.awt` and `java.swing` with `charva.awt` and `charvax.swing`, then provide `charva.awt` and `charvax.swing` via charva-lanterna - i.e. this project.
+
+* Modify the source code of the application replacing `java.awt` and `java.swing` with `charva.awt` and `charvax.swing`, then provide `charva.awt` and `charvax.swing` via [Simple DirectMedia Layer (SDL)](https://www.libsdl.org/), then rely on the [unofficial Sixel back-end for SDL 1.2](https://github.com/saitoha/libsixel/tree/v1.6.1#sdl-integration-gaming-virtualization-etc), finally access the application using a [Sixel](https://en.wikipedia.org/wiki/Sixel)-featured terminal e.g. [VT340](https://en.wikipedia.org/wiki/VT340).
+
+  * As of 9 Apr 2016 no port of CHARVA UI to SDL is known. If you want to start working on such a port, you may refer to `LanternaToolkit.java`.
+
+* Do not modify the source code of the application, and rely on the [unofficial X server with Sixel back-end](https://github.com/saitoha/libsixel/tree/v1.6.1#x11-on-sixel-terminals), finally access the application using a [Sixel](https://en.wikipedia.org/wiki/Sixel)-featured terminal e.g. [VT340](https://en.wikipedia.org/wiki/VT340).
